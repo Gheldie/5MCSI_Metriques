@@ -1,52 +1,90 @@
-<html>
-  <head>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load("current", {packages:["corechart"]});
-      google.charts.setOnLoadCallback(drawChart);
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Dinosaur', 'Length'],
-          ['Acrocanthosaurus (top-spined lizard)', 12.2],
-          ['Albertosaurus (Alberta lizard)', 9.1],
-          ['Allosaurus (other lizard)', 12.2],
-          ['Apatosaurus (deceptive lizard)', 22.9],
-          ['Archaeopteryx (ancient wing)', 0.9],
-          ['Argentinosaurus (Argentina lizard)', 36.6],
-          ['Baryonyx (heavy claws)', 9.1],
-          ['Brachiosaurus (arm lizard)', 30.5],
-          ['Ceratosaurus (horned lizard)', 6.1],
-          ['Coelophysis (hollow form)', 2.7],
-          ['Compsognathus (elegant jaw)', 0.9],
-          ['Deinonychus (terrible claw)', 2.7],
-          ['Diplodocus (double beam)', 27.1],
-          ['Dromicelomimus (emu mimic)', 3.4],
-          ['Gallimimus (fowl mimic)', 5.5],
-          ['Mamenchisaurus (Mamenchi lizard)', 21.0],
-          ['Megalosaurus (big lizard)', 7.9],
-          ['Microvenator (small hunter)', 1.2],
-          ['Ornithomimus (bird mimic)', 4.6],
-          ['Oviraptor (egg robber)', 1.5],
-          ['Plateosaurus (flat lizard)', 7.9],
-          ['Sauronithoides (narrow-clawed lizard)', 2.0],
-          ['Seismosaurus (tremor lizard)', 45.7],
-          ['Spinosaurus (spiny lizard)', 12.2],
-          ['Supersaurus (super lizard)', 30.5],
-          ['Tyrannosaurus (tyrant lizard)', 15.2],
-          ['Ultrasaurus (ultra lizard)', 30.5],
-          ['Velociraptor (swift robber)', 1.8]]);
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Métrique - Températures de Tawarano</title>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    #chart_div {
+      width: 900px;
+      height: 500px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart_div"></div>
 
+  <script>
+    // Charger Google Charts
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(drawBackgroundColor);
+
+    function drawBackgroundColor() {
+      // Fonction pour dessiner un graphique en ligne
+      function drawLineChart(data) {
+        // Créer une DataTable et y ajouter des colonnes
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Date');
+        dataTable.addColumn('number', 'Température (°C)');
+
+        // Remplir les données de la DataTable
+        data.results.forEach(entry => {
+          var date = new Date(entry.Jour * 1000); // Convertir la date Unix en format lisible
+          dataTable.addRow([date.toLocaleDateString('fr-FR'), entry.temp]);
+        });
+
+        // Configurer les options du graphique en ligne
         var options = {
           title: 'Évolution des températures de la ville de Tawarano',
-          legend: { position: 'none' },
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          hAxis: { title: 'Date' },
+          vAxis: { title: 'Température (°C)' }
         };
 
+        // Dessiner le graphique
         var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
-        chart.draw(data, options);
+        chart.draw(dataTable, options);
       }
-    </script>
-  </head>
-  <body>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
-  </body>
+
+      // Fonction pour dessiner un histogramme
+      function drawHistogram(data) {
+        // Convertir les données en un format utilisable
+        var chartData = [['Date', 'Température (°C)']];
+        data.results.forEach(entry => {
+          var date = new Date(entry.Jour * 1000);
+          chartData.push([date.toLocaleDateString('fr-FR'), entry.temp]);
+        });
+
+        // Créer une DataTable avec un tableau
+        var dataTable = google.visualization.arrayToDataTable(chartData);
+
+        // Configurer les options de l'histogramme
+        var options = {
+          title: 'Températures de la ville de Tawarano',
+          legend: { position: 'none' },
+          histogram: { bucketSize: 1 },
+          colors: ['#76A7FA'],
+          hAxis: { title: 'Date' },
+          vAxis: { title: 'Température (°C)' }
+        };
+
+        // Dessiner l'histogramme
+        var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+        chart.draw(dataTable, options);
+      }
+
+      // Récupérer les données depuis l'API et appeler les fonctions de dessin
+      fetch('/tawarano/')
+        .then(response => response.json())
+        .then(data => {
+          drawLineChart(data); // Dessiner le graphique en ligne
+          // drawHistogram(data); // Décommenter si besoin de l'histogramme
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données :', error));
+    }
+  </script>
+</body>
 </html>
