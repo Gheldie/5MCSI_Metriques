@@ -39,7 +39,7 @@ def commits():
     commit_counts = Counter(commit_minutes)
     commit_data = [{"minute": minute, "count": count} for minute, count in commit_counts.items()]
 
-    return render_template('commits.html', data=commit_data)
+    return render_template('commits.html')
 
 
 @app.route("/rapport/")
