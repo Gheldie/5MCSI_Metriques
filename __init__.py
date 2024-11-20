@@ -23,20 +23,10 @@ def meteo():
         results.append({'Jour': dt_value, 'temp': temp_day_value})
     return jsonify(results=results)
 
+
 @app.route('/commits/')
 def commits():
-    url = "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits"
-    commits_data = requests.get(url).json()
-
-    commit_counts = Counter(
-        datetime.strptime(
-            commit['commit']['author']['date'], "%Y-%m-%dT%H:%M:%SZ"
-        ).strftime("%Y-%m-%d %H:%M")
-        for commit in commits_data if 'commit' in commit and 'author' in commit['commit']
-    )
-
-    commit_data = [{"minute": minute, "count": count} for minute, count in commit_counts.items()]
-
+    commit_data = [{"minute": "2024-02-11 11:57", "count": 3}]
     return render_template('commits.html', data=commit_data)
 
 
